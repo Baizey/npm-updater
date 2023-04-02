@@ -39,7 +39,6 @@ changelog {
 }
 
 tasks {
-    // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
             sourceCompatibility = it
