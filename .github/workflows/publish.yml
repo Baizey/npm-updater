@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up JDK 17
+    - name: Setup Java
       uses: actions/setup-java@v3
       with:
         java-version: '17'
@@ -18,15 +18,16 @@ jobs:
         server-id: github
         settings-path: ${{ github.workspace }}
 
-    - name: Gradle
+    - name: Build
       uses: gradle/gradle-build-action@v2.4.0
       with:
         gradle-version: 7.4
+        arguments: buildPlugin
 
-    - name: Build plugin
-      run: ./gradlew buildPlugin
-      
-    - name: Publish plugin
+    - name: Publish
+      uses: gradle/gradle-build-action@v2.4.0
       env:
         PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH }}
-      run: ./gradlew publishPlugin
+      with:
+        gradle-version: 7.4
+        arguments: publishPlugin
