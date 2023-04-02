@@ -1,4 +1,4 @@
-name: Gradle Publish
+name: Publish
 
 on:
   release:
@@ -27,4 +27,6 @@ jobs:
       run: ./gradlew buildPlugin
       
     - name: Publish plugin
+      env:
+        PUBLISH_TOKEN: ${{ secrets.JETBRAINS_PUBLISH }}
       run: ./gradlew publishPlugin
