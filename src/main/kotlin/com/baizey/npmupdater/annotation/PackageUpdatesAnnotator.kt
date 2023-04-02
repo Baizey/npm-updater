@@ -28,9 +28,7 @@ class PackageUpdatesAnnotator : ExternalAnnotator<FileReader, DependencyResult>(
         return if (annotations.isNotEmpty()) DependencyResult(annotations) else null
     }
 
-    override fun apply(file: PsiFile, annotationResult: DependencyResult?, holder: AnnotationHolder) {
-        if (annotationResult == null) return
-
+    override fun apply(file: PsiFile, annotationResult: DependencyResult, holder: AnnotationHolder) {
         annotationResult.annotations.forEach {
             val psiElement = file.findElementAt(it.json.index)!!
             holder.newAnnotation(HighlightSeverity.WARNING, "Can update to ${it.latest}")
