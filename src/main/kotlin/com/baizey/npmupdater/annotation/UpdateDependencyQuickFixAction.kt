@@ -17,9 +17,9 @@ class UpdateDependencyQuickFixAction(
     override fun getText() = "Replace with $version"
     override fun isAvailable(project: Project, editor: Editor, file: PsiFile) = true
     override fun invoke(project: Project, editor: Editor, file: PsiFile) {
-        val a = PsiFileFactory.getInstance(project)
+        val placeholder = PsiFileFactory.getInstance(project)
                 .createFileFromText("temp.file", Language.findLanguageByID("JSON")!!, "\"$version\"")
                 .firstChild
-        element.replace(a)
+        element.replace(placeholder)
     }
 }
