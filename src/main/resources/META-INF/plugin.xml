@@ -1,0 +1,15 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.baizey.npmupdater</id>
+    <name>Npm Updater</name>
+    <vendor email="baizeydevelopment@gmail.com" url="https://github.com/baizey">baizey</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <externalAnnotator language="JSON" implementationClass="com.baizey.npmupdater.annotation.PackageUpdatesAnnotator"/>
+        <daemon.externalAnnotatorsFilter implementation="com.baizey.npmupdater.annotation.PackageAnnotationFilter"/>
+    </extensions>
+</idea-plugin>
