@@ -30,7 +30,10 @@ class PackageUpdatesAnnotator : ExternalAnnotator<FileReader, List<Dependency>>(
         val packageDependencies = parser.findDependencies(collectedInfo.content)
         return packageDependencies
                 .map(npm::getLatestVersion)
-                .filter { it.latest != it.current || it.current.isDeprecated }
+                .filter {
+                    if (it.current.isDeprecated) true
+                    else it.latest != it.current
+                }
     }
 
     override fun apply(file: PsiFile, dependencies: List<Dependency>, holder: AnnotationHolder) {

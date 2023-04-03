@@ -47,18 +47,19 @@ class NpmService(
                 val jsonResponse = httpClient.get(URI(registry.url + key))
                 val response = mapper.readValue<Response>(jsonResponse)
 
-
                 val versions = response.versions.values.map { DependencyVersion.of(it.version, it.deprecated) }
 
-                val latestRaw = response.distTags.latest.trim()
-                val latest = versions.first { it.version == latestRaw }
+                val latestMatch = DependencyVersion.of(response.distTags.latest.trim(), null)
+                val latest = versions.first { it == latestMatch }
 
-                val currentMatch = versions.first { it == dependency.current }
-                val current = DependencyVersion.of(dependency.current.versionWithType(), currentMatch.deprecatedMessage)
+                val currentMatch = versions.firstOrNull { it == dependency.current }
+                val current =
+                        if (dependency.current.isLatest) latest
+                        else DependencyVersion.of(dependency.current.versionWithType(), currentMatch?.deprecatedMessage)
 
                 CacheItem(Dependency(key, dependency.index, current, latest, versions))
             } catch (e: IOException) {
-                CacheItem(Dependency(key, dependency.index, dependency.current, DependencyVersion.of("", null), listOf()))
+                CacheItem(Dependency(key, dependency.index, dependency.current, dependency.current, listOf()))
             }
         }.value
     }

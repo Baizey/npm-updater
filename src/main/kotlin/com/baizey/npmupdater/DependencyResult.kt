@@ -2,8 +2,6 @@
 
 package com.baizey.npmupdater
 
-import java.lang.RuntimeException
-
 data class DependencyVersion private constructor(
         val deprecatedMessage: String?,
         val type: String,
@@ -13,6 +11,7 @@ data class DependencyVersion private constructor(
         val preRelease: String) {
     val version: String
     val isDeprecated get() = deprecatedMessage != null
+    val isLatest get() = this.type == latest.type
 
     init {
         val separator = if (preRelease.isBlank()) "" else "-"
@@ -20,12 +19,13 @@ data class DependencyVersion private constructor(
     }
 
     companion object {
+        private val latest = DependencyVersion(null, "latest", "", "", "", "")
+
         private val versionRegex = """(?<type>\^|~|>|<|>=|<=)?(?<major>\d+)\.?(?<minor>\d+)?\.?(?<patch>\d+)?-?(?<preRelease>\S+)?"""
                 .toRegex()
 
         fun of(version: String, deprecatedMessage: String?): DependencyVersion {
-            val match = versionRegex.find(version)
-                    ?: throw RuntimeException("Could not resolve version from given string `$version`")
+            val match = versionRegex.find(version) ?: return latest
             val versionType = match.groups["type"]?.value ?: ""
             val majorVersion = match.groups["major"]?.value ?: "0"
             val minorVersion = match.groups["minor"]?.value ?: "0"
@@ -52,7 +52,10 @@ data class DependencyVersion private constructor(
     }
 }
 
-data class PackageJsonDependency(val name: String, val current: DependencyVersion, val index: Int)
+data class PackageJsonDependency(val name: String,
+                                 val index: Int,
+                                 val current: DependencyVersion)
+
 data class Dependency(val name: String,
                       val index: Int,
                       val current: DependencyVersion,

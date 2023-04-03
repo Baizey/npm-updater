@@ -20,7 +20,7 @@ class PackageJsonParser {
                 if (match != null) {
                     val version = match.groups["version"]?.value ?: ""
                     val packageName = match.groups["package"]?.value ?: ""
-                    dependencies.add(PackageJsonDependency(packageName, DependencyVersion.of(version, null), charCount - 4))
+                    dependencies.add(PackageJsonDependency(packageName, charCount - 4, DependencyVersion.of(version, null)))
                 }
             }
         }

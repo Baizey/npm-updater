@@ -9,9 +9,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 
-class UpdateDependencyQuickFixAction(
-        private val element: PsiElement,
-        dependency: Dependency) : BaseIntentionAction() {
+class UpdateDependencyQuickFixAction(private val element: PsiElement, dependency: Dependency) : BaseIntentionAction() {
     private val version = dependency.latest.versionWithType(dependency.current.type)
     override fun getFamilyName() = "Replace with $version"
     override fun getText() = "Replace with $version"
