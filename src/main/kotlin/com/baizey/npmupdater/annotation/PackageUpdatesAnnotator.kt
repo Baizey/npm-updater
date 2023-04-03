@@ -29,13 +29,23 @@ class PackageUpdatesAnnotator : ExternalAnnotator<FileReader, DependencyResult>(
     }
 
     override fun apply(file: PsiFile, annotationResult: DependencyResult, holder: AnnotationHolder) {
-        annotationResult.annotations.forEach {
-            val psiElement = file.findElementAt(it.json.index)!!
-            holder.newAnnotation(HighlightSeverity.WARNING, "Can update to ${it.latest}")
-                    .range(psiElement)
-                    .newFix(UpdateDependencyQuickFixAction(psiElement, it))
-                    .registerFix()
-                    .create()
+        annotationResult.annotations.forEach { pack ->
+            val psiElement = file.findElementAt(pack.json.index)!!
+
+            val deprecatedMessage = pack.registry.versions.firstOrNull { it == pack.json.current }?.deprecatedMessage
+            if (deprecatedMessage != null) {
+                holder.newAnnotation(HighlightSeverity.ERROR, "DEPRECATED: $deprecatedMessage")
+                        .range(psiElement)
+                        .newFix(UpdateDependencyQuickFixAction(psiElement, pack))
+                        .registerFix()
+                        .create()
+            } else {
+                holder.newAnnotation(HighlightSeverity.WEAK_WARNING, "Can update to ${pack.registry.latest}")
+                        .range(psiElement)
+                        .newFix(UpdateDependencyQuickFixAction(psiElement, pack))
+                        .registerFix()
+                        .create()
+            }
         }
     }
 }

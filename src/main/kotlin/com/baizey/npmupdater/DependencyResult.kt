@@ -5,6 +5,7 @@ package com.baizey.npmupdater
 import java.lang.RuntimeException
 
 data class DependencyVersion private constructor(
+        val deprecatedMessage: String?,
         val type: String,
         val major: String,
         val minor: String,
@@ -21,7 +22,7 @@ data class DependencyVersion private constructor(
         private val versionRegex = """(?<type>\^|~|>|<|>=|<=)?(?<major>\d+)\.?(?<minor>\d+)?\.?(?<patch>\d+)?-?(?<preRelease>\S+)?"""
                 .toRegex()
 
-        fun of(version: String): DependencyVersion {
+        fun of(version: String, deprecatedMessage: String?): DependencyVersion {
             val match = versionRegex.find(version)
                     ?: throw RuntimeException("Could not resolve version from given string `$version`")
             val versionType = match.groups["type"]?.value ?: ""
@@ -29,7 +30,7 @@ data class DependencyVersion private constructor(
             val minorVersion = match.groups["minor"]?.value ?: "0"
             val patchVersion = match.groups["patch"]?.value ?: "0"
             val preReleaseVersion = match.groups["preRelease"]?.value ?: ""
-            return DependencyVersion(versionType, majorVersion, minorVersion, patchVersion, preReleaseVersion)
+            return DependencyVersion(deprecatedMessage, versionType, majorVersion, minorVersion, patchVersion, preReleaseVersion)
         }
     }
 
@@ -50,8 +51,7 @@ data class DependencyVersion private constructor(
     }
 }
 
-data class DependencyName(val name: String, val current: DependencyVersion, val index: Int)
-
-data class DependencyDescription(val json: DependencyName, val latest: DependencyVersion)
-
+data class PackageJsonDependency(val name: String, val current: DependencyVersion, val index: Int)
+data class NpmPackage(val name: String, val latest: DependencyVersion, val versions: List<DependencyVersion>)
+data class DependencyDescription(val json: PackageJsonDependency, val registry: NpmPackage)
 data class DependencyResult(val annotations: List<DependencyDescription>)

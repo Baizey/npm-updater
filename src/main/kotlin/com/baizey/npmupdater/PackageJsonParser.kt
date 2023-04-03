@@ -14,20 +14,20 @@ class PackageJsonParser(project: Project,
                 .parallelStream()
                 .map {
                     try {
-                        val latestVersion = npm.getLatestVersion(it.name)
-                        DependencyDescription(it, DependencyVersion.of(latestVersion))
+                        val registry = npm.getLatestVersion(it.name)
+                        DependencyDescription(it, registry)
                     } catch (e: Exception) {
                         null
                     }
                 }
                 .toList()
                 .filterNotNull()
-                .filter { it.latest != it.json.current }
+                .filter { it.registry.latest != it.json.current }
         return outOfDateDependencies
     }
 
-    private fun getDependencies(content: String): List<DependencyName> {
-        val dependencies = mutableListOf<DependencyName>()
+    private fun getDependencies(content: String): List<PackageJsonDependency> {
+        val dependencies = mutableListOf<PackageJsonDependency>()
         var charCount = 0
         var isInDependencyScope = false
         content.lines().forEach {
@@ -44,7 +44,7 @@ class PackageJsonParser(project: Project,
                 if (match != null) {
                     val version = match.groups["version"]?.value ?: ""
                     val packageName = match.groups["package"]?.value ?: ""
-                    dependencies.add(DependencyName(packageName, DependencyVersion.of(version), charCount - 4))
+                    dependencies.add(PackageJsonDependency(packageName, DependencyVersion.of(version, null), charCount - 4))
                 }
             }
         }

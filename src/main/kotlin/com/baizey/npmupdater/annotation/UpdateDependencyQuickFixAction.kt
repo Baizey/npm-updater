@@ -12,7 +12,7 @@ import com.intellij.psi.PsiFileFactory
 class UpdateDependencyQuickFixAction(
         private val element: PsiElement,
         dependency: DependencyDescription) : BaseIntentionAction() {
-    private val version = dependency.latest.versionWithType(dependency.json.current.type)
+    private val version = dependency.registry.latest.versionWithType(dependency.json.current.type)
     override fun getFamilyName() = "Replace with $version"
     override fun getText() = "Replace with $version"
     override fun isAvailable(project: Project, editor: Editor, file: PsiFile) = true
