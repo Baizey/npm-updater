@@ -1,7 +1,8 @@
 package com.baizey.npmupdater.npm
 
 import com.baizey.npmupdater.DependencyVersion
-import com.baizey.npmupdater.NpmPackage
+import com.baizey.npmupdater.Dependency
+import com.baizey.npmupdater.PackageJsonDependency
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -33,24 +34,31 @@ class NpmService(
         fun isExpired() = System.nanoTime() > (timestamp + 30 * 1e9)
     }
 
-    private val cache = concurrentMapOf<String, CacheItem<NpmPackage>>()
+    private val cache = concurrentMapOf<String, CacheItem<Dependency>>()
     private val mapper = ObjectMapper().registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
 
-    fun getLatestVersion(packageName: String): NpmPackage {
-        val result = cache.getOrDefault(packageName, null)
-        if (result != null && result.isExpired()) cache.remove(packageName)
-        return cache.computeIfAbsent(packageName) { key ->
+    fun getLatestVersion(dependency: PackageJsonDependency): Dependency {
+        val result = cache.getOrDefault(dependency.name, null)
+        if (result != null && result.isExpired()) cache.remove(dependency.name)
+        return cache.computeIfAbsent(dependency.name) { key ->
             try {
                 val jsonResponse = httpClient.get(URI(registry.url + key))
                 val response = mapper.readValue<Response>(jsonResponse)
-                val latestRaw = response.distTags.latest.trim()
+
+
                 val versions = response.versions.values.map { DependencyVersion.of(it.version, it.deprecated) }
+
+                val latestRaw = response.distTags.latest.trim()
                 val latest = versions.first { it.version == latestRaw }
-                CacheItem(NpmPackage(packageName, latest, versions))
+
+                val currentMatch = versions.first { it == dependency.current }
+                val current = DependencyVersion.of(dependency.current.versionWithType(), currentMatch.deprecatedMessage)
+
+                CacheItem(Dependency(key, dependency.index, current, latest, versions))
             } catch (e: IOException) {
-                CacheItem(NpmPackage(packageName, DependencyVersion.of("", null), listOf()))
+                CacheItem(Dependency(key, dependency.index, dependency.current, DependencyVersion.of("", null), listOf()))
             }
         }.value
     }

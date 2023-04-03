@@ -1,32 +1,8 @@
 package com.baizey.npmupdater
 
-import com.baizey.npmupdater.npm.NpmService
-import com.intellij.openapi.project.Project
-
-class PackageJsonParser(project: Project,
-                        private val npm: NpmService = NpmService(project)) {
-
+class PackageJsonParser {
     private val dependencyRegex = """^\s*"(?<package>\S+)"\s*:\s*"(?<version>\S+)".*$""".toRegex()
-
-    fun findDependenciesWithUpdatesPossible(content: String): List<DependencyDescription> {
-        val dependencies = getDependencies(content)
-        val outOfDateDependencies = dependencies
-                .parallelStream()
-                .map {
-                    try {
-                        val registry = npm.getLatestVersion(it.name)
-                        DependencyDescription(it, registry)
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
-                .toList()
-                .filterNotNull()
-                .filter { it.registry.latest != it.json.current }
-        return outOfDateDependencies
-    }
-
-    private fun getDependencies(content: String): List<PackageJsonDependency> {
+    fun findDependencies(content: String): List<PackageJsonDependency> {
         val dependencies = mutableListOf<PackageJsonDependency>()
         var charCount = 0
         var isInDependencyScope = false

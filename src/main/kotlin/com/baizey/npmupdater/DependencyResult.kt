@@ -12,6 +12,7 @@ data class DependencyVersion private constructor(
         val patch: String,
         val preRelease: String) {
     val version: String
+    val isDeprecated get() = deprecatedMessage != null
 
     init {
         val separator = if (preRelease.isBlank()) "" else "-"
@@ -52,6 +53,8 @@ data class DependencyVersion private constructor(
 }
 
 data class PackageJsonDependency(val name: String, val current: DependencyVersion, val index: Int)
-data class NpmPackage(val name: String, val latest: DependencyVersion, val versions: List<DependencyVersion>)
-data class DependencyDescription(val json: PackageJsonDependency, val registry: NpmPackage)
-data class DependencyResult(val annotations: List<DependencyDescription>)
+data class Dependency(val name: String,
+                      val index: Int,
+                      val current: DependencyVersion,
+                      val latest: DependencyVersion,
+                      val versions: List<DependencyVersion>)

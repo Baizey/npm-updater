@@ -1,6 +1,6 @@
 package com.baizey.npmupdater.annotation
 
-import com.baizey.npmupdater.DependencyDescription
+import com.baizey.npmupdater.Dependency
 import com.intellij.codeInsight.intention.impl.BaseIntentionAction
 import com.intellij.lang.Language
 import com.intellij.openapi.editor.Editor
@@ -11,8 +11,8 @@ import com.intellij.psi.PsiFileFactory
 
 class UpdateDependencyQuickFixAction(
         private val element: PsiElement,
-        dependency: DependencyDescription) : BaseIntentionAction() {
-    private val version = dependency.registry.latest.versionWithType(dependency.json.current.type)
+        dependency: Dependency) : BaseIntentionAction() {
+    private val version = dependency.latest.versionWithType(dependency.current.type)
     override fun getFamilyName() = "Replace with $version"
     override fun getText() = "Replace with $version"
     override fun isAvailable(project: Project, editor: Editor, file: PsiFile) = true
