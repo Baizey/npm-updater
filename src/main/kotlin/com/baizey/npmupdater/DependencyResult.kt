@@ -57,7 +57,7 @@ data class PackageJsonDependency(val name: String,
                                  val current: DependencyVersion)
 
 data class Dependency(val name: String,
-                      val index: Int,
+                      var index: Int,
                       val current: DependencyVersion,
                       val latest: DependencyVersion,
                       val versions: List<DependencyVersion>)

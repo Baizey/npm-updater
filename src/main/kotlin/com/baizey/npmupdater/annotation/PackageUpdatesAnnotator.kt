@@ -2,7 +2,8 @@ package com.baizey.npmupdater.annotation
 
 import com.baizey.npmupdater.Dependency
 import com.baizey.npmupdater.PackageJsonParser
-import com.baizey.npmupdater.annotation.PackageUpdatesAnnotator.*
+import com.baizey.npmupdater.annotation.PackageUpdatesAnnotator.AnnotationInfo
+import com.baizey.npmupdater.annotation.PackageUpdatesAnnotator.FileInfo
 import com.baizey.npmupdater.npm.NpmService
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
@@ -10,23 +11,17 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.jetbrains.rd.util.concurrentMapOf
 
 class PackageUpdatesAnnotator : ExternalAnnotator<FileInfo, AnnotationInfo>() {
     data class FileInfo(val content: String, val project: Project)
     data class AnnotationInfo(val dependencies: List<Dependency>)
 
-    private val cache = concurrentMapOf<String?, NpmService>()
-
     override fun collectInformation(file: PsiFile): FileInfo = runReadAction { FileInfo(file.text, file.project) }
 
-    override fun doAnnotate(collectedInfo: FileInfo?): AnnotationInfo? {
-        if (collectedInfo == null) return null
-
-        val packageDependencies = PackageJsonParser.findDependencies(collectedInfo.content)
-
-        val npm = cache.computeIfAbsent(collectedInfo.project.basePath) { NpmService(collectedInfo.project) }
-        val dependencies = packageDependencies
+    override fun doAnnotate(info: FileInfo): AnnotationInfo {
+        val packages = PackageJsonParser.findDependencies(info.content)
+        val npm = NpmService.getInstance(info.project)
+        val dependencies = packages
                 .parallelStream()
                 .map(npm::getLatestVersion)
                 .filter {
@@ -34,6 +29,7 @@ class PackageUpdatesAnnotator : ExternalAnnotator<FileInfo, AnnotationInfo>() {
                     else it.latest != it.current
                 }
                 .toList()
+
         return AnnotationInfo(dependencies)
     }
 
