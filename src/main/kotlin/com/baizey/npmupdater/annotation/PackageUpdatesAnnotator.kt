@@ -12,43 +12,44 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.jetbrains.rd.util.concurrentMapOf
 
-class PackageUpdatesAnnotator : ExternalAnnotator<FileReader, List<Dependency>>() {
-    data class FileReader(private val file: PsiFile) {
-        val content: String get() = file.text
-        val project: Project get() = file.project
-    }
+class PackageUpdatesAnnotator : ExternalAnnotator<FileInfo, AnnotationInfo>() {
+    data class FileInfo(val content: String, val project: Project)
+    data class AnnotationInfo(val dependencies: List<Dependency>)
 
-    private val cache = concurrentMapOf<String?, PackageJsonParser>()
+    private val cache = concurrentMapOf<String?, NpmService>()
 
-    override fun collectInformation(file: PsiFile): FileReader = runReadAction { FileReader(file) }
+    override fun collectInformation(file: PsiFile): FileInfo = runReadAction { FileInfo(file.text, file.project) }
 
-    override fun doAnnotate(collectedInfo: FileReader?): List<Dependency>? {
+    override fun doAnnotate(collectedInfo: FileInfo?): AnnotationInfo? {
         if (collectedInfo == null) return null
-        val parser = cache.computeIfAbsent(collectedInfo.project.basePath) { PackageJsonParser() }
-        val npm = NpmService(collectedInfo.project)
 
-        val packageDependencies = parser.findDependencies(collectedInfo.content)
-        return packageDependencies
+        val packageDependencies = PackageJsonParser.findDependencies(collectedInfo.content)
+
+        val npm = cache.computeIfAbsent(collectedInfo.project.basePath) { NpmService(collectedInfo.project) }
+        val dependencies = packageDependencies
+                .parallelStream()
                 .map(npm::getLatestVersion)
                 .filter {
                     if (it.current.isDeprecated) true
                     else it.latest != it.current
                 }
+                .toList()
+        return AnnotationInfo(dependencies)
     }
 
-    override fun apply(file: PsiFile, dependencies: List<Dependency>, holder: AnnotationHolder) {
-        dependencies.forEach { pack ->
-            val psiElement = file.findElementAt(pack.index)!!
-            if (pack.current.isDeprecated) {
-                holder.newAnnotation(HighlightSeverity.ERROR, "DEPRECATED: ${pack.current.deprecatedMessage}")
+    override fun apply(file: PsiFile, annotationInfo: AnnotationInfo, holder: AnnotationHolder) {
+        annotationInfo.dependencies.forEach {
+            val psiElement = file.findElementAt(it.index)!!
+            if (it.current.isDeprecated) {
+                holder.newAnnotation(HighlightSeverity.ERROR, "DEPRECATED: ${it.current.deprecatedMessage}")
                         .range(psiElement)
-                        .newFix(UpdateDependencyQuickFixAction(psiElement, pack))
+                        .newFix(UpdateDependencyQuickFixAction(psiElement, it))
                         .registerFix()
                         .create()
             } else {
-                holder.newAnnotation(HighlightSeverity.WEAK_WARNING, "Can update to ${pack.latest}")
+                holder.newAnnotation(HighlightSeverity.WEAK_WARNING, "Can update to ${it.latest}")
                         .range(psiElement)
-                        .newFix(UpdateDependencyQuickFixAction(psiElement, pack))
+                        .newFix(UpdateDependencyQuickFixAction(psiElement, it))
                         .registerFix()
                         .create()
             }

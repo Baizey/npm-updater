@@ -1,6 +1,6 @@
 package com.baizey.npmupdater
 
-class PackageJsonParser {
+object PackageJsonParser {
     private val dependencyRegex = """^\s*"(?<package>\S+)"\s*:\s*"(?<version>\S+)".*$""".toRegex()
     fun findDependencies(content: String): List<PackageJsonDependency> {
         val dependencies = mutableListOf<PackageJsonDependency>()
