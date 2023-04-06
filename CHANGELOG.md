@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- Support private registries by including authentication header
+- Given options of bumping patch, minor and major rather than always to latest
+
 ## 1.1.1
 
 - Optimize package info fetching from registry, they will now be fetched once in parallel and then refetched in the

@@ -1,6 +1,8 @@
 @file:Suppress("DataClassPrivateConstructor")
 
-package com.baizey.npmupdater
+package com.baizey.npmupdater.dependency
+
+const val latestString = "latest"
 
 data class DependencyVersion private constructor(
         val deprecatedMessage: String?,
@@ -9,17 +11,18 @@ data class DependencyVersion private constructor(
         val minor: String,
         val patch: String,
         val preRelease: String) {
-    val version: String
-    val isDeprecated get() = deprecatedMessage != null
-    val isLatest get() = this.type == latest.type
-
-    init {
-        val separator = if (preRelease.isBlank()) "" else "-"
-        version = "$major.$minor.$patch$separator$preRelease"
-    }
+    val version =
+            if (this.major == latestString)
+                major
+            else {
+                val separator = if (preRelease.isBlank()) "" else "-"
+                "$major.$minor.$patch$separator$preRelease"
+            }
+    val isLatest = this.major == latestString
+    val isDeprecated = deprecatedMessage != null
 
     companion object {
-        private val latest = DependencyVersion(null, "latest", "", "", "", "")
+        private val latest = DependencyVersion(deprecatedMessage = null, type = "", major = latestString, minor = "", patch = "", preRelease = "")
 
         private val versionRegex = """(?<type>\^|~|>|<|>=|<=)?(?<major>\d+)\.?(?<minor>\d+)?\.?(?<patch>\d+)?-?(?<preRelease>\S+)?"""
                 .toRegex()
@@ -52,12 +55,3 @@ data class DependencyVersion private constructor(
     }
 }
 
-data class PackageJsonDependency(val name: String,
-                                 val index: Int,
-                                 val current: DependencyVersion)
-
-data class Dependency(val name: String,
-                      var index: Int,
-                      val current: DependencyVersion,
-                      val latest: DependencyVersion,
-                      val versions: List<DependencyVersion>)
