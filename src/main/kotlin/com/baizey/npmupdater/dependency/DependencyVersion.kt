@@ -18,7 +18,7 @@ data class DependencyVersion private constructor(
                 val separator = if (preRelease.isBlank()) "" else "-"
                 "$major.$minor.$patch$separator$preRelease"
             }
-    val isLatest = this.major == latestString
+    val isLatestString = this.major == latestString
     val isDeprecated = deprecatedMessage != null
 
     companion object {

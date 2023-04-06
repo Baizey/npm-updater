@@ -51,7 +51,7 @@ class DependencyService(
                 ?: cacheItem.latest
 
         val current = DependencyVersion.of(
-                if (packageJsonDependency.current.isLatest) cacheItem.latest.versionWithType(packageJsonDependency.current.type)
+                if (packageJsonDependency.current.isLatestString) cacheItem.latest.versionWithType(packageJsonDependency.current.type)
                 else packageJsonDependency.current.versionWithType(),
                 currentMatch.deprecatedMessage)
 
