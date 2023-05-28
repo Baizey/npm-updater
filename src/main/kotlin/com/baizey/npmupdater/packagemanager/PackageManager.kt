@@ -51,7 +51,7 @@ interface PackageManager {
 class Http(private val client: HttpClient = HttpClient.newBuilder().build()) {
     fun get(uri: URI, token: String?): String {
         val request = HttpRequest.newBuilder().uri(uri)
-        if (token != null) request.header("Authorization", token)
+        if (token != null) request.header("Authorization", "Bearer $token")
         val response = client.send(request.build(), HttpResponse.BodyHandlers.ofString())
         return response.body()
     }
