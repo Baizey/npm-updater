@@ -6,9 +6,9 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.8.10"
-    id("org.jetbrains.intellij") version "1.13.2"
-    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.kotlin.jvm") version "1.9.23"
+    id("org.jetbrains.intellij") version "1.17.2"
+    id("org.jetbrains.changelog") version "2.2.0"
 }
 
 group = properties("pluginGroup")
@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
@@ -41,11 +41,11 @@ changelog {
 tasks {
     properties("javaVersion").let {
         withType<JavaCompile> {
-            sourceCompatibility = it
-            targetCompatibility = it
+            sourceCompatibility = "21"
+            targetCompatibility = "21"
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = it
+            kotlinOptions.jvmTarget = "21"
         }
     }
 
@@ -91,6 +91,6 @@ tasks {
         // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+        channels.set(listOf(properties("pluginVersion")))
     }
 }
