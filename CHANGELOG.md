@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 - 1.2.3
+
+Various minor fixes, primarily updating to say supporting newer IDE versions
+
 ## 1.2.0
 
 - Support private registries by including authentication header
