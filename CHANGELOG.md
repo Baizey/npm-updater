@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0
+
+- Added support for fix to latest if current version does not exist
+- Internal refactoring
+
 ## 1.2.1 - 1.2.3
 
 Various minor fixes, primarily updating to say supporting newer IDE versions
