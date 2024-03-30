@@ -41,11 +41,11 @@ changelog {
 tasks {
     properties("javaVersion").let {
         withType<JavaCompile> {
-            sourceCompatibility = "21"
-            targetCompatibility = "21"
+            sourceCompatibility = "17"
+            targetCompatibility = "17"
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "21"
+            kotlinOptions.jvmTarget = "17"
         }
     }
 

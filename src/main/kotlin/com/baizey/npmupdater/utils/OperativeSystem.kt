@@ -4,7 +4,7 @@ import java.util.*
 
 object OperativeSystem {
     val isWindows = System
-            .getProperty("os.name")
-            .lowercase(Locale.getDefault())
-            .contains("win")
+        .getProperty("os.name")
+        .lowercase(Locale.getDefault())
+        .contains("win")
 }

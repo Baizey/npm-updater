@@ -1,7 +1,6 @@
-package com.baizey.npmupdater.utils
+package com.baizey.npmupdater.packagejson
 
-import com.baizey.npmupdater.dependency.DependencyVersion
-import com.baizey.npmupdater.dependency.PackageJsonDependency
+import com.baizey.npmupdater.dto.NpmSemanticVersion
 
 object PackageJsonParser {
     private val dependencyRegex = """^\s*"(?<package>\S+)"\s*:\s*"(?<version>\S+)".*$""".toRegex()
@@ -23,7 +22,13 @@ object PackageJsonParser {
                 if (match != null) {
                     val version = match.groups["version"]?.value ?: ""
                     val packageName = match.groups["package"]?.value ?: ""
-                    dependencies.add(PackageJsonDependency(packageName, charCount - 4, DependencyVersion.of(version, null)))
+                    dependencies.add(
+                        PackageJsonDependency(
+                            packageName,
+                            charCount - 4,
+                            NpmSemanticVersion.of(version, null)
+                        )
+                    )
                 }
             }
         }
